@@ -22,6 +22,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <limits>
 #include <mutex>
@@ -154,6 +155,9 @@ namespace rfpkog
       cl::Kernel & kernel = kernels[w];
       
       std::unique_lock lock(this->mutex, std::defer_lock);
+
+      std::chrono::time_point<std::chrono::steady_clock> t_0;
+      std::chrono::time_point<std::chrono::steady_clock> t_1;
 
       cl_int status = CL_SUCCESS;
       
@@ -321,6 +325,10 @@ namespace rfpkog
           std::cerr << "Worker thread " << w << " will now run kernel." << std::endl;
           lock.unlock();
         }
+        if (verbosity >= 1)
+        {
+          t_0 = std::chrono::steady_clock::now();
+        }
 
         cl::Event event;
         status = cmd_qs[w].enqueueNDRangeKernel(kernel, cl::NDRange(), cl::NDRange(pds[0].size(), pds[1].size()), cl::NDRange(local_work_shapes[w][0], local_work_shapes[w][1]), NULL, &event);
@@ -353,6 +361,15 @@ namespace rfpkog
         if (this->symmetric)
         {
           this->results[idxs[1]*fnames[1].size() + idxs[0]] = this->results[idxs[0]*fnames[1].size() + idxs[1]];
+        }
+
+        if (verbosity >= 1)
+        {
+          t_1 = std::chrono::steady_clock::now();
+          std::chrono::duration<double> elapsed = t_1 - t_0;
+          lock.lock();
+          std::cerr << "Worker thread " << w << " computed result (" << idxs[0] << "," << idxs[1] << ") in " << elapsed.count() << " s." << std::endl;
+          lock.unlock();
         }
       } // End main loop.
 
