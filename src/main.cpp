@@ -38,19 +38,19 @@ int main(int argc, char ** argv)
   int opterr = opts.parse(argc, argv);
   if (opterr)
   {
-    rfpkog::Options::print_help();
+    std::cerr << opts.get_help();
     return 1;
   }
   opterr = opts.validate();
   if (opterr)
   {
-    rfpkog::Options::print_help();
+    std::cerr << opts.get_help();
     return 1;
   }
 
   if (opts.help)
   {
-    rfpkog::Options::print_help();
+    std::cout << opts.get_help();
     return 0;
   }
   

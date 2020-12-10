@@ -45,7 +45,7 @@ namespace rfpkog
 
     int parse(const int argc, const char * const * argv);
     int validate();
-    static void print_help();
+    std::string get_help() const;
 
     bool help;
     bool list_devices;
@@ -62,5 +62,6 @@ namespace rfpkog
     std::array<std::vector<std::string>, 2> fnames;
     std::string output_fname;
     std::string kernel_fname;
+    std::string invocation;
   };
 }

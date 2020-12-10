@@ -25,6 +25,7 @@
 #include <iostream>
 #include <limits>
 #include <set>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -35,6 +36,7 @@ namespace rfpkog
 {
   int Options::parse(const int argc, const char * const * argv)
   {
+    invocation = std::string(argv[0]);
     for (int i = 1; i < argc; ++i)
     {
       const std::string arg(argv[i]);
@@ -262,8 +264,28 @@ namespace rfpkog
     return 0;
   }
 
-  void Options::print_help()
+  std::string Options::get_help() const
   {
-    std::cerr << "FIXME: Implement help text." << std::endl;
+    std::ostringstream s;
+
+    s << "Usage: " << invocation << " [options] <list_file_1> <list_file_2>" << std::endl;
+    s << std::endl;
+    s << "-d, --degree <d>          Read this degree from DIPHA persistence diagram files. Mandatory if reading DIPHA persistence file." << std::endl;
+    s << "--devices <list>          Use these GPU devices on the selected platform. Use --list to see a list. Mandatory." << std::endl;
+    s << "                          Comma-separated non-negative integers. Inclusive ranges can be specified by m-n, and can be part of the list. Mandatory." << std::endl;
+    s << "--64, --double            Do GPU computations with double precision. Default is single precision." << std::endl;
+    s << "-f, --finitization <f>    Make infinite intervals die at f. Mandatory." << std::endl;
+    s << "-h, --help                Print this help message." << std::endl;
+    s << "-l, --list                List all OpenCL platforms and devices available on the system." << std::endl;
+    s << "-o, --output <f>          Use f as the output file name. Use - for standard output. [Default: -]" << std::endl;
+    s << "-p, --platform <p>        Select platform p. Use --list to see a list. Mandatory." << std::endl;
+    s << "-s, --sigma <s>           Value of sigma. Positive real. Mandatory." << std::endl;
+    s << "-v, --verbosity           Increase verbosity level. Can be repeated." << std::endl;
+    s << "--workshape <w>           Use this local work shape on the GPUs. [Default: max]" << std::endl;
+    s << "                          Comma-separated pair of positive integers, or \"max\" for automatic." << std::endl;
+
+    s << std::endl;
+
+    return s.str();
   }
 }
