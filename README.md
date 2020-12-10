@@ -87,17 +87,17 @@ were made.
 The following table refers to crude benchmarks for a single pair of
 persistence diagrams, each one of the given size.
 
-| Backend \\ PD sizes                  | 10k       | 100k      | 500k      |
-|--------------------------------------|----------:|----------:|----------:|
-| *CPU reference*                      | 1.0 s     | 104 s     | —         |
-| *' (double precision)*               | 1.4 s     | 144 s     | —         |
-| *GUDHI CPU reference (double prec.)* | 8.5 s     | —         | —         |
-| Intel UHD Graphics 630               | 0.1 s     | 11.4 s    | —         |
-| ' (double precision)                 | 0.4 s     | 37.6      | —         |
-| Nvidia GeForce GTX 1650              | 0.02 s    | 1.2 s     | 30 s      |
-| ' (double precision)                 | 0.2 s     | 13.8 s    | —         |
-| Nvidia Tesla T4                      | —         | 0.9 s     | 19 s      |
-| ' (double precision)                 | —         | 7.0 s     | —         |
+| Backend \\ PD sizes                           | 10k       | 100k      | 500k      |
+|-----------------------------------------------|----------:|----------:|----------:|
+| *CPU reference*                               | 1.0 s     | 104 s     | —         |
+| *CPU reference* (double precision)            | 1.4 s     | 144 s     | —         |
+| *GUDHI CPU reference* (double precision)      | 8.5 s     | —         | —         |
+| Intel UHD Graphics 630                        | 0.1 s     | 11.4 s    | —         |
+| Intel UHD Graphics 630 (double precision)     | 0.4 s     | 37.6      | —         |
+| Nvidia GeForce GTX 1650                       | 0.02 s    | 1.2 s     | 30 s      |
+| Nvidia GeForce GTX 1650 (double precision)    | 0.2 s     | 13.8 s    | —         |
+| Nvidia Tesla T4                               | —         | 0.9 s     | 19 s      |
+| Nvidia Tesla T4 (double precision)            | —         | 7.0 s     | —         |
 
 The CPU benchmarks, in italics above, were run on an Intel i7-9750H
 CPU. As a rough estimate, the current version provides a speedup
