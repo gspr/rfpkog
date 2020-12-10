@@ -37,24 +37,19 @@
 #include "options.hpp"
 #include "rfpkog.hpp"
 
-void help()
-{
-  std::cerr << "FIXME: Implement help text." << std::endl;
-}
-
 int main(int argc, char ** argv)
 {
   rfpkog::Options opts;
   int opterr = opts.parse(argc, argv);
   if (opterr)
   {
-    help();
+    rfpkog::Options::print_help();
     return 1;
   }
   opterr = opts.validate();
   if (opterr)
   {
-    help();
+    rfpkog::Options::print_help();
     return 1;
   } 
   

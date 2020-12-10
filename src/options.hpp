@@ -45,6 +45,7 @@ namespace rfpkog
 
     int parse(const int argc, const char * const * argv);
     int validate();
+    static void print_help();
 
     bool help;
     bool list_devices;

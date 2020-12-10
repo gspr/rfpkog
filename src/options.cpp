@@ -261,4 +261,9 @@ namespace rfpkog
 
     return 0;
   }
+
+  void Options::print_help()
+  {
+    std::cerr << "FIXME: Implement help text." << std::endl;
+  }
 }
