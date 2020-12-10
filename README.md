@@ -25,6 +25,9 @@ Computing K(X, Y) is also a task that lends itself nicely to GPU
 computations. And I wanted to finally get my hands dirty with GPU
 programming. Hence RFPKOG.
 
+See [https://sr.ht/~gspr/RFPKOG/](https://sr.ht/~gspr/RFPKOG/) for
+more information.
+
 ## Installation
 
 RFPKOG needs only:
