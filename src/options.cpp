@@ -193,7 +193,7 @@ namespace rfpkog
 
   int Options::validate()
   {
-    if (!list_devices)
+    if (!list_devices && !help)
     {
       if (sigma <= 0 || std::isinf(sigma) || std::isnan(sigma))
       {
