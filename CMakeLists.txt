@@ -12,6 +12,14 @@ test_big_endian(BIG_ENDIAN)
 find_package(Threads REQUIRED)
 find_package(OpenCL REQUIRED)
 
+find_program(PANDOC pandoc)
+if(PANDOC STREQUAL "PANDOC-NOTFOUND")
+  set(PANDOC_FOUND 0)
+else()
+  message(STATUS "Pandoc found: ${PANDOC}")
+  set(PANDOC_FOUND 1)
+endif()
+
 set(RFPKOG_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/rfpkog" CACHE PATH "Installation directory for data files and kernel source.")
 
 add_executable(rfpkog
@@ -42,3 +50,12 @@ target_link_libraries(rfpkog PRIVATE Threads::Threads OpenCL::OpenCL)
 
 install(TARGETS rfpkog RUNTIME DESTINATION bin)
 install(FILES src/heat_kernel.cl DESTINATION "${RFPKOG_DATADIR}")
+
+if(PANDOC_FOUND)
+  add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/man" COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/man")
+  add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/man/rfpkog.1"
+    COMMAND "${PANDOC}" --standalone --to man -o ${CMAKE_CURRENT_BINARY_DIR}/man/rfpkog.1 ${CMAKE_CURRENT_SOURCE_DIR}/man/rfpkog.1.md)
+  add_custom_target(manpage ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/man" "${CMAKE_CURRENT_BINARY_DIR}/man/rfpkog.1")
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/man/rfpkog.1" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
+endif()
+
