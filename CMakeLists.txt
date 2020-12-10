@@ -12,7 +12,7 @@ test_big_endian(BIG_ENDIAN)
 find_package(Threads REQUIRED)
 find_package(OpenCL REQUIRED)
 
-set(RFPKOG_DATADIR "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR}/rfpkog" CACHE STRING "Installation directory for data files.")
+set(RFPKOG_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/rfpkog" CACHE PATH "Installation directory for data files and kernel source.")
 
 add_executable(rfpkog
   src/dtype.hpp
@@ -40,3 +40,5 @@ endif()
 target_include_directories(rfpkog PRIVATE ${OpenCL_INCLUDE_DIR})
 target_link_libraries(rfpkog PRIVATE Threads::Threads OpenCL::OpenCL)
 
+install(TARGETS rfpkog RUNTIME DESTINATION bin)
+install(FILES src/heat_kernel.cl DESTINATION "${RFPKOG_DATADIR}")
