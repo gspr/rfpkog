@@ -88,6 +88,10 @@ persistence diagrams, each one of the given size.
 | NVidia Tesla T4                      | —         | 0.9 s     | 19 s      |
 | ' (double precision)                 | —         | 7.0 s     | —         |
 
+The CPU benchmarks, in italics above, were run on an Intel i7-9750H
+CPU. As a rough estimate, the current version provides a speedup
+factor of 100 from that CPU to a decent GPU.
+
 ## To do
 
  * Allow splitting really big persistence diagrams across GPUs and
