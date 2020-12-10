@@ -86,9 +86,9 @@ persistence diagrams, each one of the given size.
 | *GUDHI CPU reference (double prec.)* | 8.5 s     | —         | —         |
 | Intel UHD Graphics 630               | 0.1 s     | 11.4 s    | —         |
 | ' (double precision)                 | 0.4 s     | 37.6      | —         |
-| NVidia GeForce GTX 1650              | 0.02 s    | 1.2 s     | 30 s      |
+| Nvidia GeForce GTX 1650              | 0.02 s    | 1.2 s     | 30 s      |
 | ' (double precision)                 | 0.2 s     | 13.8 s    | —         |
-| NVidia Tesla T4                      | —         | 0.9 s     | 19 s      |
+| Nvidia Tesla T4                      | —         | 0.9 s     | 19 s      |
 | ' (double precision)                 | —         | 7.0 s     | —         |
 
 The CPU benchmarks, in italics above, were run on an Intel i7-9750H
@@ -112,7 +112,7 @@ factor of 100 from that CPU to a decent GPU.
  
  * Support for more operating systems.
 
- * Support for more kernels, like [Persistence weighted Gaussian
+ * Support for more kernels, like [persistence weighted Gaussian
    kernels](http://proceedings.mlr.press/v48/kusano16.html).
 
 ### Maybe to do
