@@ -70,9 +70,9 @@ parallelized over the GPUs.
 
 ## Benchmarks
 
-RFPKOG was informally benchmarked against randomly generated
-persistence diagrams of various sizes. Comparisons with a
-straight-forward C++ implementation for CPUs, and with [GUDHI's CPU
+RFPKOG was informally benchmarked on randomly generated persistence
+diagrams of various sizes. Comparisons with a straight-forward C++
+implementation for CPUs, and with [GUDHI's CPU
 implementation](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.kernel_methods.PersistenceScaleSpaceKernel)
 were made.
 
