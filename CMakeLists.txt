@@ -48,7 +48,7 @@ endif()
 target_include_directories(rfpkog PRIVATE ${OpenCL_INCLUDE_DIR})
 target_link_libraries(rfpkog PRIVATE Threads::Threads OpenCL::OpenCL)
 
-install(TARGETS rfpkog RUNTIME DESTINATION bin)
+install(TARGETS rfpkog RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 install(FILES src/heat_kernel.cl DESTINATION "${RFPKOG_DATADIR}")
 
 if(PANDOC_FOUND)
