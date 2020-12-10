@@ -51,7 +51,13 @@ int main(int argc, char ** argv)
   {
     rfpkog::Options::print_help();
     return 1;
-  } 
+  }
+
+  if (opts.help)
+  {
+    rfpkog::Options::print_help();
+    return 0;
+  }
   
   cl_int status;
   
