@@ -276,6 +276,10 @@ int main(int argc, char ** argv)
     local_work_shapes = std::vector<std::array<std::size_t, 2> >(devices.size(), opts.local_work_shape);
   }
 
+  if (opts.verbosity >= 1)
+  {
+    std::cerr << "Initiating computations." << std::endl;
+  }
 
   std::vector<double> results(opts.fnames[0].size()*opts.fnames[1].size());
   int rfpkog_status = 0;
