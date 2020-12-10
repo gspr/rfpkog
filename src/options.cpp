@@ -268,21 +268,24 @@ namespace rfpkog
   {
     std::ostringstream s;
 
-    s << "Usage: " << invocation << " [options] <list_file_1> <list_file_2>" << std::endl;
+    s << "Usage: " << invocation << " [options] <file_1> <file_2>" << std::endl;
     s << std::endl;
-    s << "-d, --degree <d>          Read this degree from DIPHA persistence diagram files. Mandatory if reading DIPHA persistence file." << std::endl;
-    s << "--devices <list>          Use these GPU devices on the selected platform. Use --list to see a list. Mandatory." << std::endl;
-    s << "                          Comma-separated non-negative integers. Inclusive ranges can be specified by m-n, and can be part of the list. Mandatory." << std::endl;
-    s << "--64, --double            Do GPU computations with double precision. Default is single precision." << std::endl;
-    s << "-f, --finitization <f>    Make infinite intervals die at f. Mandatory." << std::endl;
-    s << "-h, --help                Print this help message." << std::endl;
-    s << "-l, --list                List all OpenCL platforms and devices available on the system." << std::endl;
-    s << "-o, --output <f>          Use f as the output file name. Use - for standard output. [Default: -]" << std::endl;
-    s << "-p, --platform <p>        Select platform p. Use --list to see a list. Mandatory." << std::endl;
-    s << "-s, --sigma <s>           Value of sigma. Positive real. Mandatory." << std::endl;
-    s << "-v, --verbosity           Increase verbosity level. Can be repeated." << std::endl;
-    s << "--workshape <w>           Use this local work shape on the GPUs. [Default: max]" << std::endl;
-    s << "                          Comma-separated pair of positive integers, or \"max\" for automatic." << std::endl;
+    s << "-d, --degree <d>         Read this degree from DIPHA persistence diagram files. Mandatory if reading DIPHA persistence file." << std::endl;
+    s << "--devices <list>         Use these GPU devices on the selected platform. Use --list to see a list. Mandatory." << std::endl;
+    s << "                         Comma-separated non-negative integers. Inclusive ranges can be specified by m-n, and can be part of the list. Mandatory." << std::endl;
+    s << "--64, --double           Do GPU computations with double precision. Default is single precision." << std::endl;
+    s << "-f, --finitization <f>   Make infinite intervals die at f. Mandatory." << std::endl;
+    s << "-h, --help               Print this help message." << std::endl;
+    s << "-l, --list               List all OpenCL platforms and devices available on the system." << std::endl;
+    s << "-o, --output <f>         Use f as the output file name. Use - for standard output. [Default: -]" << std::endl;
+    s << "-p, --platform <p>       Select platform p. Use --list to see a list. Mandatory." << std::endl;
+    s << "-s, --sigma <s>          Value of sigma. Positive real. Mandatory." << std::endl;
+    s << "-v, --verbosity          Increase verbosity level. Can be repeated." << std::endl;
+    s << "--workshape <w>          Use this local work shape on the GPUs. [Default: max]" << std::endl;
+    s << "                         Comma-separated pair of positive integers, or \"max\" for automatic." << std::endl;
+    s << "<file_1> <file_2>        These should refer to two text files, each containing a list of persistence diagram files to process, one per line. Mandatory." << std::endl;
+    s << "                         If file_list_1 contains M files and file_list_2 contains N files, then the output is an MxN matrix of the corresponding kernel values." << std::endl;
+    s << "                         If file_list_1 and file_list_2 are the same file, then the computation will exploit symmetry and do half the work. The output will be the same." << std::endl;
 
     s << std::endl;
 
