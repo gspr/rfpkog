@@ -28,6 +28,14 @@ programming. Hence RFPKOG.
 See [https://sr.ht/~gspr/RFPKOG/](https://sr.ht/~gspr/RFPKOG/) for
 more information.
 
+## About
+
+The [heat kernel](https://doi.org/10.1109/CVPR.2015.7299106) is
+currently the only supported one. Support for other kernels will come.
+
+The code is licensed under the GNU Lesser General Public License,
+version 3.0.
+
 ## Installation
 
 RFPKOG needs only:
