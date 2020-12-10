@@ -68,7 +68,7 @@ environment variable `RFPKOG_KERNEL_FILE_NAME`.
 
 Run with `--help` to see a help text. An example invocation is
 ```
-rfpkog  -v -d 1 --devices 0 --platform 0 --f 1.0 -s 1.0 list_1.txt list_2.txt
+rfpkog -d 1 --devices 0 --platform 0 -f 1.0 -s 1.0 list_1.txt list_2.txt
 ```
 
 See `rfpkog --help` for more information.
