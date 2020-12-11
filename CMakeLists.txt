@@ -40,7 +40,6 @@ target_compile_definitions(rfpkog PRIVATE KERNEL_FILENAME="${RFPKOG_DATADIR}/hea
 target_compile_definitions(rfpkog PRIVATE CL_HPP_MINIMUM_OPENCL_VERSION=120)
 target_compile_definitions(rfpkog PRIVATE CL_HPP_TARGET_OPENCL_VERSION=120)
 target_compile_definitions(rfpkog PRIVATE CL_HPP_CL_1_2_DEFAULT_BUILD)
-target_compile_definitions(rfpkog PRIVATE CL_HPP_ENABLE_EXCEPTIONS=0)
 
 if(BIG_ENDIAN)
   target_compile_definitions(rfpkog PRIVATE BIGENDIAN)
