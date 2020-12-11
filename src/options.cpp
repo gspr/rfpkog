@@ -89,19 +89,30 @@ namespace rfpkog
       }
       else if (arg == "--workshape")
       {
-        if (i + 1 < argc && (std::string(argv[i+1]) == "max" || std::string(argv[i+1]) == "auto")) // --max and --auto are synonyms for now.
+        if (i + 1 < argc) 
         {
-          local_work_shape = {0, 0};
+          if (std::string(argv[i+1]) == "max" || std::string(argv[i+1]) == "auto") // --max and --auto are synonyms for now.
+          {
+            local_work_shape = {0, 0};
+          }
+          else
+          {
+            const std::vector<std::string> splitargs = split(argv[i+1], ',');
+            if (splitargs.size() == 2)
+            {
+              local_work_shape = {std::stoul(splitargs[0]), std::stoul(splitargs[1])};
+            }
+            else
+            {
+              std::cerr << "Malformed argument for --workshape." << std::endl;
+              return 1;
+            }
+          }
           ++i;
-        }
-        else if (i + 2 < argc)
-        {
-          local_work_shape = {std::stoul(argv[i+1]), std::stoul(argv[i+2])};
-          i += 2;
         }
         else
         {
-          std::cerr << "Missing argument(s) for --workshape." << std::endl;
+          std::cerr << "Missing argument for --workshape." << std::endl;
           return 1;
         }  
       }
