@@ -358,7 +358,7 @@ namespace rfpkog
         delete[] thread_result;
         
         this->results[idxs[0]*fnames[1].size() + idxs[1]] = sum / (sigma8*PI);
-        if (this->symmetric && idxs[1] < idxs[0])
+        if (this->symmetric)
         {
           this->results[idxs[1]*fnames[1].size() + idxs[0]] = this->results[idxs[0]*fnames[1].size() + idxs[1]];
         }
