@@ -134,6 +134,8 @@ factor of 100 from that CPU to a decent GPU.
  * Support for more kernels, like [persistence weighted Gaussian
    kernels](http://proceedings.mlr.press/v48/kusano16.html).
 
+ * More robust and standard options parsing.
+
 ### Maybe to do
 
  * Combine with the aforementioned MPI support to use *a lot* of GPUs.
