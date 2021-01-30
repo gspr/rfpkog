@@ -36,6 +36,17 @@ currently the only supported one. Support for other kernels will come.
 The code is licensed under the GNU Lesser General Public License,
 version 3.0.
 
+### Normalization and GUDHI compatibility
+
+**Important:** RFPKOG currently computes heat kernel values *without
+any normalization prefactor*, i.e. without the 1/(8σπ) prefactor of
+[the paper](https://doi.org/10.1109/CVPR.2015.7299106).
+
+Moreover, note that the `bandwidth` parameter in [GUDHI's CPU
+implementation](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.kernel_methods.PersistenceScaleSpaceKernel)
+uses a different convention than the `sigma` parameter in RFPKOG (the
+former equals `2*sqrt(sigma)`).
+
 ## Installation
 
 RFPKOG needs only:
