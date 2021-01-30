@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(rfpkog VERSION 0.1
+project(rfpkog VERSION 0.1.2
   DESCRIPTION "Really Fast Persistence Kernels On GPUs"
   LANGUAGES CXX
   )
