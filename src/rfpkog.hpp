@@ -3,7 +3,7 @@
 /*
  * This file is part of RFPKOG
  *
- * Copyright (C) 2020 Gard Spreemann <gspr@nonempty.org>
+ * Copyright (C) 2020-2021 Gard Spreemann <gspr@nonempty.org>
  *
  * SPDX-License-Identifier: LGPL-3.0-only
  *
