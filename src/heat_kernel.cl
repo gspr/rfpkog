@@ -87,6 +87,6 @@ __kernel void heat_and_sum(const dtype sigma8, __local vdtype * lpd1, __local vd
   
   if (lj == 0 && li == 0)
   {
-      out[wi*wN + wj] = partials[0];
+    out[wi*wN + wj] = partials[0];
   }
 }
