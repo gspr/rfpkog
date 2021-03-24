@@ -21,7 +21,7 @@
  */
 
 #ifndef KERNEL_FILENAME
-#define KERNEL_FILENAME "heat_kernel.cl"
+#define KERNEL_FILENAME "kernels.cl"
 #endif
 
 #include <array>

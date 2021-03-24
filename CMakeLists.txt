@@ -36,7 +36,7 @@ set_target_properties(rfpkog PROPERTIES
   CXX_EXTENSIONS OFF
   )
 
-target_compile_definitions(rfpkog PRIVATE KERNEL_FILENAME="${RFPKOG_DATADIR}/heat_kernel.cl")
+target_compile_definitions(rfpkog PRIVATE KERNEL_FILENAME="${RFPKOG_DATADIR}/kernels.cl")
 target_compile_definitions(rfpkog PRIVATE CL_HPP_MINIMUM_OPENCL_VERSION=120)
 target_compile_definitions(rfpkog PRIVATE CL_HPP_TARGET_OPENCL_VERSION=120)
 target_compile_definitions(rfpkog PRIVATE CL_HPP_CL_1_2_DEFAULT_BUILD)
@@ -48,7 +48,7 @@ target_include_directories(rfpkog PRIVATE ${OpenCL_INCLUDE_DIR})
 target_link_libraries(rfpkog PRIVATE Threads::Threads OpenCL::OpenCL)
 
 install(TARGETS rfpkog RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-install(FILES src/heat_kernel.cl DESTINATION "${RFPKOG_DATADIR}")
+install(FILES src/kernels.cl DESTINATION "${RFPKOG_DATADIR}")
 
 if(PANDOC_FOUND)
   add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/man" COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/man")

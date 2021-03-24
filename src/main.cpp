@@ -233,7 +233,7 @@ int main(int argc, char ** argv)
   std::vector<cl::Kernel> kernels;
   for (std::size_t i = 0; i < devices.size(); ++i)
   {
-    kernels.emplace_back(kernel_program, "heat_and_sum", &status);
+    kernels.emplace_back(kernel_program, "rfpkog_heat", &status);
     if (status != CL_SUCCESS)
     {
       std::cerr << "Failed to create kernel. OpenCL error code " << status << "." << std::endl;

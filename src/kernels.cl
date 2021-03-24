@@ -26,7 +26,7 @@ typedef float dtype;
 typedef float2 vdtype;
 #endif
 
-__kernel void heat_and_sum(const dtype sigma8, __local vdtype * lpd1, __local vdtype * lpd1bar, __local vdtype * lpd2, const __global vdtype * pd1, const __global vdtype * pd2,  __local dtype * partials, __global dtype * out)
+__kernel void rfpkog_heat(const dtype sigma8, __local vdtype * lpd1, __local vdtype * lpd1bar, __local vdtype * lpd2, const __global vdtype * pd1, const __global vdtype * pd2,  __local dtype * partials, __global dtype * out)
 {
   const size_t i = get_global_id(0);
   const size_t j = get_global_id(1);
