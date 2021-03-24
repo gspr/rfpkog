@@ -20,7 +20,7 @@
  * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <CL/cl2.hpp>
+#include "cl_headers.hpp"
 
 namespace rfpkog
 {

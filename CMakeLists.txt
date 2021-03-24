@@ -23,6 +23,7 @@ endif()
 set(RFPKOG_DATADIR "${CMAKE_INSTALL_FULL_DATADIR}/rfpkog" CACHE PATH "Installation directory for data files and kernel source.")
 
 add_executable(rfpkog
+  src/cl_headers.hpp
   src/dtype.hpp
   src/main.cpp
   src/misc.cpp src/misc.hpp 

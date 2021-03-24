@@ -26,8 +26,7 @@
 #include <sstream>
 #include <vector>
 
-#include <CL/cl2.hpp>
-
+#include "cl_headers.hpp"
 #include "dtype.hpp"
 #include "options.hpp"
 #include "rfpkog.hpp"
