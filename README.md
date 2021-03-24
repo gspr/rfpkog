@@ -56,17 +56,17 @@ RFPKOG needs only:
  
  * OpenCL 1.2 or above. Typically dependent on your GPU hardware.
  
- * CMake for building. Debian/Ubuntu package name: `cmake`
+ * Meson for building. Debian/Ubuntu package name: `meson`
+   - CMake still works, but will be removed.
  
 
 To build and install:
 
 ```
-mkdir build
+meson setup -Doptimization=2 -Dprefix=/where/you/want/rfpkog/to/go build
 cd build
-cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/where/you/want/rfpkog/to/go ..
-make
-make install
+meson compile
+meson install 
 ```
 
 You can also build and run RFPKOG without installing it. The location

@@ -1,0 +1,6 @@
+option('kernel_path', type : 'string', value : '',
+       description : 'Override location of kernel file')
+option('legacy_cl_headers', type : 'boolean', value : false,
+       description : 'Use old-style OpenCL headers (cl2.hpp)')
+option('pandoc', type : 'string', value : '',
+       description : 'Use this pandoc executable to generate man page')
