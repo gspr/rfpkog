@@ -52,11 +52,11 @@ former equals `2*sqrt(sigma)`).
 RFPKOG needs only:
 
  * A C++ compiler that supports C++17. C++11 will suffice with very
-   small modifications to the code. Debian/Ubuntu package name: `g++`
+   small modifications to the code. Debian/Ubuntu package name `g++`.
  
  * OpenCL 1.2 or above. Typically dependent on your GPU hardware.
  
- * Meson for building. Debian/Ubuntu package name: `meson`
+ * Meson for building. Debian/Ubuntu package name `meson`.
    - CMake still works, but will be removed.
  
 
