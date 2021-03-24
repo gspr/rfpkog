@@ -204,72 +204,74 @@ namespace rfpkog
 
   int Options::validate()
   {
-    if (!list_devices && !help)
+    if (list_devices || help)
     {
-      if (sigma <= 0 || std::isinf(sigma) || std::isnan(sigma))
-      {
-        std::cerr << "σ must be positive and finite." << std::endl;
-        return 1;
-      }
-      
-      if (std::isinf(finitization) || std::isnan(finitization))
-      {
-        std::cerr << "The finitization must be finite." << std::endl;
-        return 1;
-      }
-
-      if (degree == std::numeric_limits<unsigned int>::max())
-      {
-        std::cerr << "You must specify a degree for DIPHA input files." << std::endl;
-        return 1;
-      }
-
-      if (platform_id == std::numeric_limits<std::size_t>::max())
-      {
-        std::cerr << "You must specify an OpenCL platform. Use --list to see those available." << std::endl;
-        return 1;
-      }
-      
-      if (fname_lists[0].empty() || fname_lists[1].empty())
-      {
-        std::cerr << "You must specify two files (or one repeated twice) containing the persistence diagram file names to consider." << std::endl;
-        return 1;
-      }
+      return 0;
+    }
     
-      symmetric = fname_lists[0] == fname_lists[1];
+    if (sigma <= 0 || std::isinf(sigma) || std::isnan(sigma))
+    {
+      std::cerr << "sigma must be positive and finite." << std::endl;
+      return 1;
+    }
+    
+    if (std::isinf(finitization) || std::isnan(finitization))
+    {
+      std::cerr << "The finitization must be finite." << std::endl;
+      return 1;
+    }
 
-      for (std::size_t a : {0, 1})
-      {
-        std::ifstream stream(fname_lists[a]);
-        if (!stream.is_open())
-        {
-          std::cerr << "Failed to read input file " << fname_lists[a] << "." << std::endl;
-          return 1;
-        }
-        std::string line;
-        while (std::getline(stream, line))
-        {
-          fnames[a].push_back(line);
-        }
-      }
+    if (degree == std::numeric_limits<unsigned int>::max())
+    {
+      std::cerr << "You must specify a degree for DIPHA input files." << std::endl;
+      return 1;
+    }
 
-      if (symmetric)
-        fnames[1] = fnames[0];
+    if (platform_id == std::numeric_limits<std::size_t>::max())
+    {
+      std::cerr << "You must specify an OpenCL platform. Use --list to see those available." << std::endl;
+      return 1;
+    }
       
-      if (fnames[0].empty() || fnames[1].empty())
+    if (fname_lists[0].empty() || fname_lists[1].empty())
+    {
+      std::cerr << "You must specify two files (or one repeated twice) containing the persistence diagram file names to consider." << std::endl;
+      return 1;
+    }
+    
+    symmetric = fname_lists[0] == fname_lists[1];
+
+    for (std::size_t a : {0, 1})
+    {
+      std::ifstream stream(fname_lists[a]);
+      if (!stream.is_open())
       {
-        std::cerr << "The file lists cannot be empty." << std::endl;
+        std::cerr << "Failed to read input file " << fname_lists[a] << "." << std::endl;
         return 1;
       }
-
-      if (output_fname == "-")
-        output_fname.clear();
-
-      if (kernel_fname == "")
+      std::string line;
+      while (std::getline(stream, line))
       {
-        std::cerr << "The kernel file name, defined at compile-time or overriden through the RFPKOG_KERNEL_FILENAME environment variable, cannot be empty." << std::endl;
-        return 1;
+        fnames[a].push_back(line);
       }
+    }
+
+    if (symmetric)
+      fnames[1] = fnames[0];
+      
+    if (fnames[0].empty() || fnames[1].empty())
+    {
+      std::cerr << "The file lists cannot be empty." << std::endl;
+      return 1;
+    }
+    
+    if (output_fname == "-")
+      output_fname.clear();
+
+    if (kernel_fname == "")
+    {
+      std::cerr << "The kernel file name, defined at compile-time or overriden through the RFPKOG_KERNEL_FILENAME environment variable, cannot be empty." << std::endl;
+      return 1;
     }
 
     return 0;
