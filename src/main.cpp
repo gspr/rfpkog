@@ -236,7 +236,7 @@ int main(int argc, char ** argv)
     kernels.emplace_back(kernel_program, "rfpkog_heat", &status);
     if (status != CL_SUCCESS)
     {
-      std::cerr << "Failed to create kernel. OpenCL error code " << status << "." << std::endl;
+      std::cerr << "Failed to create kernel for device " << i << ". OpenCL error code " << status << "." << std::endl;
       return 1;
     }
   }
