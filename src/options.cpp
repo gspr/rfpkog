@@ -232,7 +232,7 @@ namespace rfpkog
       
       if (fname_lists[0].empty() || fname_lists[1].empty())
       {
-        std::cerr << "You must specify two files (or one repeated twice) containing the persistence diagram file nmaes to consider." << std::endl;
+        std::cerr << "You must specify two files (or one repeated twice) containing the persistence diagram file names to consider." << std::endl;
         return 1;
       }
     
