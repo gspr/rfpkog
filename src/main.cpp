@@ -78,7 +78,7 @@ int main(int argc, char ** argv)
     for (std::size_t i = 0; i < platforms_available.size(); ++i)
     {
       std::cout << " * ";
-      std::cout << std::setw(int(std::log10(platforms_available.size())) + 1) << i;
+      std::cout << std::setw(static_cast<int>(std::log10(platforms_available.size())) + 1) << i;
       std::cout << ": " << platforms_available[i].getInfo<CL_PLATFORM_NAME>() << std::endl;
       std::vector<cl::Device> devices_available;
       status = platforms_available[i].getDevices(CL_DEVICE_TYPE_ALL, &devices_available);
@@ -90,7 +90,7 @@ int main(int argc, char ** argv)
       for (std::size_t j = 0; j < devices_available.size(); ++j)
       {
         std::cout << "   - ";
-        std::cout << std::setw(int(std::log10(devices_available.size())) + 1) << j;
+        std::cout << std::setw(static_cast<int>(std::log10(devices_available.size())) + 1) << j;
         std::cout << ": " << devices_available[j].getInfo<CL_DEVICE_NAME>() << std::endl;
       }     
     }
