@@ -38,14 +38,17 @@ version 3.0.
 
 ### Normalization and GUDHI compatibility
 
-**Important:** RFPKOG currently computes heat kernel values *without
-any normalization prefactor*, i.e. without the 1/(8σπ) prefactor of
-[the paper](https://doi.org/10.1109/CVPR.2015.7299106).
-
-Moreover, note that the `bandwidth` parameter in [GUDHI's CPU
+**Important:** the normalization prefactor and the `bandwidth`
+parameter in [GUDHI's CPU
 implementation](https://gudhi.inria.fr/python/latest/representations.html#gudhi.representations.kernel_methods.PersistenceScaleSpaceKernel)
-uses a different convention than the `sigma` parameter in RFPKOG (the
-former equals `2*sqrt(sigma)`).
+uses a different convention than the `sigma` parameter in
+RFPKOG. RFPKOG follows the
+[paper](https://doi.org/10.1109/CVPR.2015.7299106)'s
+convention. Specifically, if K'_σ denotes GUDHI's kernel with
+bandwidth parameter σ, then RFPKOG with parameter σ is
+```
+K_σ(X, Y) = K'_{2*sqrt(σ)}/(2*sqrt(2πσ))
+```
 
 ## Installation
 
