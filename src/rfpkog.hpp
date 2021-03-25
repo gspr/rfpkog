@@ -174,21 +174,14 @@ namespace rfpkog
         statuses[w] = status;
         lock.unlock();
       }
-      status = kernel.setArg(2, cl::Local(local_work_shapes[w][0]*sizeof(typename T::vector_type)));
+      status = kernel.setArg(2, cl::Local(local_work_shapes[w][1]*sizeof(typename T::vector_type)));
       if (status != CL_SUCCESS)
       {
         lock.lock();
         statuses[w] = status;
         lock.unlock();
       }
-      status = kernel.setArg(3, cl::Local(local_work_shapes[w][1]*sizeof(typename T::vector_type)));
-      if (status != CL_SUCCESS)
-      {
-        lock.lock();
-        statuses[w] = status;
-        lock.unlock();
-      }
-      status = kernel.setArg(6, cl::Local(local_work_shapes[w][0]*local_work_shapes[w][1]*sizeof(typename T::scalar_type)));
+      status = kernel.setArg(5, cl::Local(local_work_shapes[w][0]*local_work_shapes[w][1]*sizeof(typename T::scalar_type)));
       if (status != CL_SUCCESS)
       {
         lock.lock();
@@ -288,7 +281,7 @@ namespace rfpkog
           return;
         }
           
-        status = kernel.setArg(7, result_buf);
+        status = kernel.setArg(6, result_buf);
         if (status != CL_SUCCESS)
         {
           lock.lock();
@@ -298,7 +291,7 @@ namespace rfpkog
           return;
         }
         
-        status = kernel.setArg(4, pd_bufs[0]);
+        status = kernel.setArg(3, pd_bufs[0]);
         if (status != CL_SUCCESS)
         {
           lock.lock();
@@ -308,7 +301,7 @@ namespace rfpkog
           return;
         }
         
-        status = kernel.setArg(5, pd_bufs[1]);
+        status = kernel.setArg(4, pd_bufs[1]);
         if (status != CL_SUCCESS)
         {
           lock.lock();
