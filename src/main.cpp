@@ -52,6 +52,14 @@ int main(int argc, char ** argv)
     std::cout << opts.get_help();
     return 0;
   }
+
+  if (opts.print_version)
+  {
+    std::cout << "RFPKOG version " << RFPKOG_VERSION << std::endl;
+    std::cout << std::endl;
+    std::cout << opts.copyright << std::endl;
+    return 0;
+  }
   
   cl_int status;
   

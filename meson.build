@@ -25,6 +25,8 @@ add_project_arguments('-DCL_HPP_MINIMUM_OPENCL_VERSION=120',
                       '-DCL_HPP_CL_1_2_DEFAULT_BUILD',
                       language : 'cpp')
 
+add_project_arguments('-DRFPKOG_VERSION="' + meson.project_version() + '"', language : 'cpp')
+
 executable('rfpkog',
            'src/cl_headers.hpp',
            'src/dtype.hpp',

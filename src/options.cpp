@@ -87,6 +87,10 @@ namespace rfpkog
       {
         ++verbosity;
       }
+      else if (arg == "--version")
+      {
+        print_version = true;
+      }
       else if (arg == "--workshape")
       {
         if (i + 1 < argc) 
@@ -204,7 +208,7 @@ namespace rfpkog
 
   int Options::validate()
   {
-    if (list_devices || help)
+    if (list_devices || help || print_version)
     {
       return 0;
     }
@@ -294,6 +298,7 @@ namespace rfpkog
     s << "-p, --platform <p>       Select platform p. Use --list to see a list. Mandatory." << std::endl;
     s << "-s, --sigma <s>          Value of sigma. Positive real. Mandatory." << std::endl;
     s << "-v, --verbosity          Increase verbosity level. Can be repeated." << std::endl;
+    s << "--version                Print version and exit." << std::endl;
     s << "--workshape <w>          Use this local work shape on the GPUs. [Default: max]" << std::endl;
     s << "                         Comma-separated pair of positive integers, or \"max\" for automatic." << std::endl;
     s << "<file_1> <file_2>        These should refer to two text files, each containing a list of persistence diagram files to process, one per line. Mandatory." << std::endl;

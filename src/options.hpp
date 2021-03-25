@@ -24,6 +24,11 @@
 #define KERNEL_FILENAME "kernels.cl"
 #endif
 
+#ifndef RFPKOG_VERSION
+#define RFPKOG_VERSION "undefined"
+#endif
+
+
 #include <array>
 #include <limits>
 #include <set>
@@ -35,12 +40,16 @@ namespace rfpkog
   class Options
   {
   public:
-    Options() : help(false), list_devices(false), use_double(false), symmetric(false),
+    Options() : help(false), list_devices(false), use_double(false), symmetric(false), print_version(false),
                 sigma(std::numeric_limits<double>::quiet_NaN()),
                 finitization(std::numeric_limits<double>::quiet_NaN()),
                 degree(std::numeric_limits<unsigned int>::max()), verbosity(0), local_work_shape({0,0}),
                 platform_id(std::numeric_limits<std::size_t>::max()), output_fname(""), kernel_fname(KERNEL_FILENAME)
     {
+      copyright = std::string(R"(Copyright (C) 2020-2021 Gard Spreemann
+License LGPLv3: GNU LGPL version 3 <https://gnu.org/licenses/lgpl.html>.
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.)");
     }
 
     int parse(const int argc, const char * const * argv);
@@ -51,6 +60,7 @@ namespace rfpkog
     bool list_devices;
     bool use_double;
     bool symmetric;
+    bool print_version;
     double sigma;
     double finitization;
     unsigned int degree;
@@ -63,5 +73,6 @@ namespace rfpkog
     std::string output_fname;
     std::string kernel_fname;
     std::string invocation;
+    std::string copyright;
   };
 }

@@ -152,6 +152,7 @@ contains the complete list of changes.
 
  * Change build system to meson.
  * Add test scripts to validate calculations against GUDHI.
+ * Track version number in the software itself.
 
 ### 0.1.2
 
