@@ -143,25 +143,4 @@ factor of 100 from that CPU to a decent GPU.
 
  * Combine with the aforementioned MPI support to use *a lot* of GPUs.
 
-## Changelog
 
-These are the biggest changes in each new version. The git log
-contains the complete list of changes.
-
-### 0.2.0
-
- * Change build system to meson.
- * Add test scripts to validate calculations against GUDHI.
- * Track version number in the software itself.
-
-### 0.1.2
-
- * Add note on GUDHI compatibility.
-
-### 0.1.1
-
- * Fix bug in symmetric mode.
-
-### 0.1
-
- * Initial release.
