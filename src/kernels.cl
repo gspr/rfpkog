@@ -26,68 +26,61 @@ typedef float dtype;
 typedef float2 vdtype;
 #endif
 
-__kernel void rfpkog_heat(const dtype sigma8, __local vdtype * lpd1, __local vdtype * lpd2, const __global vdtype * pd1, const __global vdtype * pd2,  __local dtype * partials, __global dtype * out)
+__kernel void rfpkog_heat(const dtype sigma8,
+                          __local vdtype * lpd0, __local vdtype * lpd1,
+                          const __global vdtype * pd0, const __global vdtype * pd1,
+                          __local dtype * partials, __global dtype * out)
 {
-  const size_t i = get_global_id(0);
-  const size_t j = get_global_id(1);
-  //const size_t M = get_global_size(0);
-  const size_t N = get_global_size(1);
+  const size_t i[2]  = {get_global_id(0)   , get_global_id(1)   };
+  const size_t N[2]  = {get_global_size(0) , get_global_size(1) };
+  const size_t wi[2] = {get_group_id(0)    , get_group_id(1)    };
+  const size_t li[2] = {get_local_id(0)    , get_local_id(1)    };
+  const size_t lN[2] = {get_local_size(0)  , get_local_size(1)  };
 
-  const size_t wi = get_group_id(0);
-  const size_t wj = get_group_id(1);
-  
-  const size_t li = get_local_id(0);
-  const size_t lj = get_local_id(1);
-  const size_t lM = get_local_size(0);
-  const size_t lN = get_local_size(1);
+  const size_t wN[2] = {N[0]/lN[0], N[1]/lN[1]};
 
-  //const size_t wM = M/lM;
-  const size_t wN = N/lN;
-
-  if (lj == 0)
+  if (li[1] == 0)
   {
-    lpd1[li] = pd1[i];
+    lpd0[li[0]] = pd0[i[0]];
   } 
-  
-  if (li == 0)
+  if (li[0] == 0)
   {
-    lpd2[lj] = pd2[j];
+    lpd1[li[1]] = pd1[i[1]];
   }
-
   barrier(CLK_LOCAL_MEM_FENCE);
 
   const uint2 perm = (uint2)(1, 0);
 
-  const vdtype x = lpd1[li];
+  const vdtype x = lpd0[li[0]];
   const vdtype xbar = shuffle(x, perm);
-  const vdtype y = lpd2[lj];
+  const vdtype y = lpd1[li[1]];
 
   const vdtype diff = x - y;
   const vdtype diffbar = xbar - y;
 
-  partials[li*lN + lj] = exp(-dot(diff, diff)/sigma8) - exp(-dot(diffbar, diffbar)/sigma8);
+  partials[li[0]*lN[1] + li[1]] = exp(-dot(diff, diff)/sigma8) - exp(-dot(diffbar, diffbar)/sigma8);
   barrier(CLK_LOCAL_MEM_FENCE);
 
-  for (size_t ljj = lN / 2; ljj > 0; ljj /= 2)
+  for (size_t k = lN[1] / 2; k > 0; k /= 2)
   {
-    if (lj < ljj)
+    if (li[1] < k)
     {
-      partials[li*lN + lj] += partials[li*lN + lj + ljj];
+      partials[li[0]*lN[1] + li[1]] += partials[li[0]*lN[1] + li[1] + k];
     }
     barrier(CLK_LOCAL_MEM_FENCE);
   }
 
-  for (size_t lii = lM / 2; lii > 0; lii /= 2)
+  for (size_t k = lN[0] / 2; k > 0; k /= 2)
   {
-    if (lj == 0 && li < lii)
+    if (li[1] == 0 && li[0] < k)
     {
-      partials[li*lN] += partials[(li + lii)*lN];
+      partials[li[0]*lN[1]] += partials[(li[0] + k)*lN[1]];
     }
     barrier(CLK_LOCAL_MEM_FENCE);
   }
   
-  if (lj == 0 && li == 0)
+  if (li[0] == 0 && li[1] == 0)
   {
-    out[wi*wN + wj] = partials[0];
+    out[wi[0]*wN[1] + wi[1]] = partials[0];
   }
 }
