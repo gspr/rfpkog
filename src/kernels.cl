@@ -49,10 +49,8 @@ __kernel void rfpkog_heat(const dtype sigma8,
   }
   barrier(CLK_LOCAL_MEM_FENCE);
 
-  const uint2 perm = (uint2)(1, 0);
-
   const vdtype x = lpd0[li[0]];
-  const vdtype xbar = shuffle(x, perm);
+  const vdtype xbar = {x.s1, x.s0};
   const vdtype y = lpd1[li[1]];
 
   const vdtype diff = x - y;
