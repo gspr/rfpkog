@@ -52,30 +52,19 @@ namespace rfpkog
            const std::array<std::vector<std::string >, 2> & fnames) :
       context(context), cmd_qs(cmd_qs), kernels(kernels), local_work_shapes(local_work_shapes),
       sigma8(8*sigma), finitization(finitization), degree(degree), verbosity(verbosity), symmetric(symmetric),
-      fnames(fnames), idxs({0,0}), done(false), mutex()
+      fnames(fnames), idxs({0,0}), done(false),
+      results(fnames[0].size()*fnames[1].size(), std::numeric_limits<double>::quiet_NaN()),
+      statuses(cmd_qs.size(), CL_SUCCESS),
+      mutex()
     {
-      results = new double[fnames[0].size()*fnames[1].size()];
-      std::fill(results, results + fnames[0].size()*fnames[1].size(), std::numeric_limits<double>::quiet_NaN());
-
-      statuses = new cl_int[cmd_qs.size()];
-      std::fill(statuses, statuses + cmd_qs.size(), CL_SUCCESS);
-    }
-
-    ~RFPKOG()
-    {
-      delete[] statuses;
-      delete[] results;
     }
 
     RFPKOG(const RFPKOG &) = delete;
     RFPKOG & operator=(const RFPKOG &) = delete;
 
-    std::vector<double> get_results() const
+    inline const std::vector<double> & get_results() const
     {
-      std::vector<double> ret;
-      ret.reserve(fnames[0].size()*fnames[1].size());
-      std::copy(results, results + fnames[0].size()*fnames[1].size(), std::back_inserter(ret));
-      return ret;
+      return results;
     }
     
     int run()
@@ -123,8 +112,8 @@ namespace rfpkog
     const std::array<std::vector<std::string >, 2> & fnames;
     std::array<std::size_t, 2> idxs;
     bool done;
-    double * results; // I believe that in theory, concurrent writing to different elements of an std::vector can be UB. We'll play it safe and do it raw.
-    cl_int * statuses;
+    std::vector<double> results;
+    std::vector<cl_int> statuses;
     std::mutex mutex;
 
     inline void advance()
@@ -138,7 +127,6 @@ namespace rfpkog
       if (idxs[0] >= fnames[0].size())
         done = true;
     }
-
 
     // ATTENTION: This method contains a lot of variables with names that shadow members.
     void worker(const std::size_t w)
@@ -268,16 +256,14 @@ namespace rfpkog
             
           }
         }
-
-        std::size_t thread_result_size = (pds[0].size()/local_work_shapes[w][0])*(pds[1].size()/local_work_shapes[w][1]);
-        typename T::scalar_type * thread_result = new typename T::scalar_type[thread_result_size];
-        result_buf = cl::Buffer(context, CL_MEM_READ_WRITE, thread_result_size*sizeof(typename T::scalar_type), NULL, &status);
+        
+        std::vector<typename T::scalar_type> thread_result((pds[0].size()/local_work_shapes[w][0])*(pds[1].size()/local_work_shapes[w][1]));
+        result_buf = cl::Buffer(context, CL_MEM_READ_WRITE, thread_result.size()*sizeof(typename T::scalar_type), NULL, &status);
         if (status != CL_SUCCESS)
         {
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
           
@@ -287,7 +273,6 @@ namespace rfpkog
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
         
@@ -297,7 +282,6 @@ namespace rfpkog
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
         
@@ -307,7 +291,6 @@ namespace rfpkog
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
         
@@ -329,25 +312,22 @@ namespace rfpkog
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
         event.wait();
 
-        status = cmd_qs[w].enqueueReadBuffer(result_buf, true, 0, thread_result_size*sizeof(typename T::scalar_type), thread_result, NULL, NULL);
+        status = cmd_qs[w].enqueueReadBuffer(result_buf, true, 0, thread_result.size()*sizeof(typename T::scalar_type), thread_result.data(), NULL, NULL);
         if (status != CL_SUCCESS)
         {
           lock.lock();
           statuses[w] = status;
           lock.unlock();
-          delete[] thread_result;
           return;
         }
 
         double sum = 0;
-        for (std::size_t i = 0; i < thread_result_size; ++i)
+        for (std::size_t i = 0; i < thread_result.size(); ++i)
           sum += thread_result[i];
-        delete[] thread_result;
         
         this->results[idxs[0]*fnames[1].size() + idxs[1]] = sum / (sigma8*PI);
         if (this->symmetric)
