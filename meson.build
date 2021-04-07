@@ -36,6 +36,7 @@ executable('rfpkog',
            'src/misc.cpp', 'src/misc.hpp',
            'src/options.cpp', 'src/options.hpp',
            'src/pd.hpp',
+           'src/pwgk.hpp',
            'src/rfpkog.hpp',
            install : true,
            dependencies : [dep_threads, dep_opencl])

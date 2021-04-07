@@ -37,6 +37,7 @@
 #include "heat_kernel.hpp"
 #include "options.hpp"
 #include "pd.hpp"
+#include "pwgk.hpp"
 
 namespace rfpkog
 {
@@ -61,6 +62,9 @@ namespace rfpkog
         {
         case Kernel_choice::pssk:
           kernels_.push_back(std::make_unique<Heat_kernel<T>>(context_, cmd_qs_[i], devices_[i], program_, opts_.local_work_shape, opts_.sigma));
+          break;
+        case Kernel_choice::pwgk:
+          kernels_.push_back(std::make_unique<PWGK<T>>(context_, cmd_qs_[i], devices_[i], program_, opts_.local_work_shape, opts_.sigma, opts_.p, opts_.c));
           break;
         }
 

@@ -63,6 +63,26 @@ namespace rfpkog
           return 1;
         }
       }
+      else if (arg == "--power")
+      {
+        if (i + 1 < argc)
+          p = std::stod(argv[++i]);
+        else
+        {
+          std::cerr << "Missing argument for --power." << std::endl;
+          return 1;
+        }
+      }
+      else if (arg == "--weight")
+      {
+        if (i + 1 < argc)
+          c = std::stod(argv[++i]);
+        else
+        {
+          std::cerr << "Missing argument for --weight." << std::endl;
+          return 1;
+        }
+      }
       else if (arg == "--finitization" || arg == "-f")
       {
         if (i + 1 < argc)
@@ -70,6 +90,27 @@ namespace rfpkog
         else
         {
           std::cerr << "Missing argument for --finitization." << std::endl;
+          return 1;
+        }
+      }
+      else if (arg == "--kernel" || arg == "-k")
+      {
+        if (i + 1 < argc)
+        {
+          std::string kernel_string(argv[++i]);
+          if (kernel_string == "pssk" || kernel_string == "PSSK" || kernel_string == "heat")
+            kernel_choice = Kernel_choice::pssk;
+          else if (kernel_string == "pwgk" || kernel_string == "PWGK")
+            kernel_choice = Kernel_choice::pwgk;
+          else
+          {
+            std::cerr << "Invalid argument for --kernel." << std::endl;
+            return 1;
+          }
+        }
+        else
+        {
+          std::cerr << "Missing argument for --kernel." << std::endl;
           return 1;
         }
       }
@@ -218,6 +259,28 @@ namespace rfpkog
       std::cerr << "sigma must be positive and finite." << std::endl;
       return 1;
     }
+
+    if (kernel_choice == Kernel_choice::pssk)
+    {
+      if (!std::isnan(p) || !std::isnan(c))
+      {
+        std::cerr << "Power and weight parameters make no sense for the PSSK." << std::endl;
+        return 1;
+      }
+    }
+    else if (kernel_choice == Kernel_choice::pwgk)
+    {
+      if (p <= 0 || std::isinf(p) || std::isnan(p))
+      {
+        std::cerr << "Power must be positive and finite." << std::endl;
+        return 1;
+      }
+      if (c <= 0 || std::isinf(c) || std::isnan(c))
+      {
+        std::cerr << "Weight must be positive and finite." << std::endl;
+        return 1;
+      }
+    }
     
     if (std::isinf(finitization) || std::isnan(finitization))
     {
@@ -292,13 +355,19 @@ namespace rfpkog
     s << "                         Comma-separated non-negative integers. Inclusive ranges can be specified by m-n, and can be part of the list. Mandatory." << std::endl;
     s << "--64, --double           Do GPU computations with double precision. Default is single precision." << std::endl;
     s << "-f, --finitization <f>   Make infinite intervals die at f. Mandatory." << std::endl;
+    s << "-k, --kernel <k>         Kernel to compute. Optional. Valid options are:" << std::endl;
+    s << "                          - pssk: (Default) Persistence Scale Space Kernel" << std::endl;
+    s << "                          - heat: Synonym for \"pssk\"" << std::endl;
+    s << "                          - pwgk: Persistence Weighted Gaussian Kernel" << std::endl;
     s << "-h, --help               Print this help message." << std::endl;
     s << "-l, --list               List all OpenCL platforms and devices available on the system." << std::endl;
     s << "-o, --output <f>         Use f as the output file name. Use - for standard output. [Default: -]" << std::endl;
     s << "-p, --platform <p>       Select platform p. Use --list to see a list. Mandatory." << std::endl;
-    s << "-s, --sigma <s>          Value of sigma. Positive real. Mandatory." << std::endl;
+    s << "--power <p>              Parameter p. Positive real. Mandatory for PWGK." << std::endl;
+    s << "-s, --sigma <s>          Parameter sigma. Meaning depends on kernel. Positive real. Mandatory." << std::endl;
     s << "-v, --verbosity          Increase verbosity level. Can be repeated." << std::endl;
     s << "--version                Print version and exit." << std::endl;
+    s << "--weight <c>             Parameter c. Positive real. Mandatory for PWGK." << std::endl;
     s << "--workshape <w>          Use this local work shape on the GPUs. [Default: max]" << std::endl;
     s << "                         Comma-separated pair of positive integers, or \"max\" for automatic." << std::endl;
     s << "<file_1> <file_2>        These should refer to two text files, each containing a list of persistence diagram files to process, one per line. Mandatory." << std::endl;

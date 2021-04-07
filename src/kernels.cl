@@ -82,3 +82,61 @@ __kernel void rfpkog_heat(const dtype sigma8,
     out[wi[0]*wN[1] + wi[1]] = partials[0];
   }
 }
+
+
+__kernel void rfpkog_pwgk(const dtype sigmasq2, const dtype p, const dtype c,
+                          __local vdtype * lpd0, __local vdtype * lpd1,
+                          const __global vdtype * pd0, const __global vdtype * pd1,
+                          __local dtype * partials, __global dtype * out)
+{
+  const size_t i[2]  = {get_global_id(0)   , get_global_id(1)   };
+  const size_t N[2]  = {get_global_size(0) , get_global_size(1) };
+  const size_t wi[2] = {get_group_id(0)    , get_group_id(1)    };
+  const size_t li[2] = {get_local_id(0)    , get_local_id(1)    };
+  const size_t lN[2] = {get_local_size(0)  , get_local_size(1)  };
+
+  const size_t wN[2] = {N[0]/lN[0], N[1]/lN[1]};
+
+  if (li[1] == 0)
+  {
+    lpd0[li[0]] = pd0[i[0]];
+  } 
+  if (li[0] == 0)
+  {
+    lpd1[li[1]] = pd1[i[1]];
+  }
+  barrier(CLK_LOCAL_MEM_FENCE);
+
+  const vdtype x = lpd0[li[0]];
+  const vdtype y = lpd1[li[1]];
+  const vdtype diff = x - y;
+
+  const dtype arcx = atan(c*pow(x.s1 - x.s0, p));
+  const dtype arcy = atan(c*pow(y.s1 - y.s0, p));
+
+  partials[li[0]*lN[1] + li[1]] = arcx*arcy*exp(-dot(diff, diff)/sigmasq2);
+  barrier(CLK_LOCAL_MEM_FENCE);
+
+  for (size_t k = lN[1] / 2; k > 0; k /= 2)
+  {
+    if (li[1] < k)
+    {
+      partials[li[0]*lN[1] + li[1]] += partials[li[0]*lN[1] + li[1] + k];
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+
+  for (size_t k = lN[0] / 2; k > 0; k /= 2)
+  {
+    if (li[1] == 0 && li[0] < k)
+    {
+      partials[li[0]*lN[1]] += partials[(li[0] + k)*lN[1]];
+    }
+    barrier(CLK_LOCAL_MEM_FENCE);
+  }
+  
+  if (li[0] == 0 && li[1] == 0)
+  {
+    out[wi[0]*wN[1] + wi[1]] = partials[0];
+  }
+}

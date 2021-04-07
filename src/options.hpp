@@ -37,13 +37,14 @@
 
 namespace rfpkog
 {
-  enum class Kernel_choice { pssk };
+  enum class Kernel_choice { pssk, pwgk };
   
   class Options
   {
   public:
     Options() : help(false), list_devices(false), use_double(false), symmetric(false), print_version(false),
                 sigma(std::numeric_limits<double>::quiet_NaN()),
+                p(std::numeric_limits<double>::quiet_NaN()), c(std::numeric_limits<double>::quiet_NaN()),
                 finitization(std::numeric_limits<double>::quiet_NaN()),
                 degree(std::numeric_limits<unsigned int>::max()), verbosity(0), local_work_shape({0,0}),
                 platform_id(std::numeric_limits<std::size_t>::max()), output_fname(""), kernel_fname(KERNEL_FILENAME), kernel_choice(Kernel_choice::pssk)
@@ -64,6 +65,8 @@ There is NO WARRANTY, to the extent permitted by law.)");
     bool symmetric;
     bool print_version;
     double sigma;
+    double p;
+    double c;
     double finitization;
     unsigned int degree;
     unsigned int verbosity;
