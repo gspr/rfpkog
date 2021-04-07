@@ -30,6 +30,8 @@ add_project_arguments('-DRFPKOG_VERSION="' + meson.project_version() + '"', lang
 executable('rfpkog',
            'src/cl_headers.hpp',
            'src/dtype.hpp',
+           'src/heat_kernel.hpp',
+           'src/kernel.hpp',
            'src/main.cpp',
            'src/misc.cpp', 'src/misc.hpp',
            'src/options.cpp', 'src/options.hpp',

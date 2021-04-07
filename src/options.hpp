@@ -37,6 +37,8 @@
 
 namespace rfpkog
 {
+  enum class Kernel_choice { pssk };
+  
   class Options
   {
   public:
@@ -44,7 +46,7 @@ namespace rfpkog
                 sigma(std::numeric_limits<double>::quiet_NaN()),
                 finitization(std::numeric_limits<double>::quiet_NaN()),
                 degree(std::numeric_limits<unsigned int>::max()), verbosity(0), local_work_shape({0,0}),
-                platform_id(std::numeric_limits<std::size_t>::max()), output_fname(""), kernel_fname(KERNEL_FILENAME)
+                platform_id(std::numeric_limits<std::size_t>::max()), output_fname(""), kernel_fname(KERNEL_FILENAME), kernel_choice(Kernel_choice::pssk)
     {
       copyright = std::string(R"(Copyright (C) 2020-2021 Gard Spreemann
 License LGPLv3: GNU LGPL version 3 <https://gnu.org/licenses/lgpl.html>.
@@ -74,5 +76,6 @@ There is NO WARRANTY, to the extent permitted by law.)");
     std::string kernel_fname;
     std::string invocation;
     std::string copyright;
+    Kernel_choice kernel_choice;
   };
 }

@@ -236,71 +236,35 @@ int main(int argc, char ** argv)
     }
   }
 
-
-  std::vector<cl::Kernel> kernels;
-  for (std::size_t i = 0; i < devices.size(); ++i)
-  {
-    kernels.emplace_back(kernel_program, "rfpkog_heat", &status);
-    if (status != CL_SUCCESS)
-    {
-      std::cerr << "Failed to create kernel for device " << i << ". OpenCL error code " << status << "." << std::endl;
-      return 1;
-    }
-  }
   
-
-  std::vector<std::array<std::size_t, 2> > local_work_shapes;
-  if (opts.local_work_shape[0] == 0 || opts.local_work_shape[1] == 0) // Automatic determination.
-  {
-    for (std::size_t i = 0; i < devices.size(); ++i)
-    {
-      std::size_t pwgsm = kernels[i].getWorkGroupInfo<CL_KERNEL_PREFERRED_WORK_GROUP_SIZE_MULTIPLE>(devices[i], &status);
-      if (status != CL_SUCCESS)
-      {
-        std::cerr << "Failed to automatically determine max good workgroup shape for device ID " << i << ". OpenCL error code " << status << "." << std::endl;
-        return 1;
-      }
-      std::size_t wgs = kernels[i].getWorkGroupInfo<CL_KERNEL_WORK_GROUP_SIZE>(devices[i], &status);
-      if (status != CL_SUCCESS)
-      {
-        std::cerr << "Failed to automatically determine max good workgroup shape for device ID " << i << ". OpenCL error code " << status << "." << std::endl;
-        return 1;
-      }
-      local_work_shapes.push_back({1, (wgs/pwgsm)*pwgsm});
-      if (local_work_shapes.back()[1] == 0)
-      {
-        std::cerr << "Failed to automatically determine max good workgroup shape for device ID " << i << "." << std::endl;
-        return 1;
-      }
-      if (opts.verbosity >= 3)
-      {
-        std::cerr << "Automatically picked workgroup shape " << local_work_shapes[i][0] << "x" << local_work_shapes[i][1] << " for device ID " << i << "." << std::endl;
-      }
-    }
-  }
-  else
-  {
-    local_work_shapes = std::vector<std::array<std::size_t, 2> >(devices.size(), opts.local_work_shape);
-  }
-
   if (opts.verbosity >= 1)
   {
     std::cerr << "Initiating computations." << std::endl;
   }
 
-  std::vector<double> results(opts.fnames[0].size()*opts.fnames[1].size());
+  std::vector<double> results;
   int rfpkog_status = 0;
   if (opts.use_double)
   {
-    rfpkog::RFPKOG<rfpkog::DoubleType> rfpkog(context, cmd_qs, kernels, local_work_shapes, opts.sigma, opts.finitization, opts.degree, opts.verbosity, opts.symmetric, opts.fnames);
+    rfpkog::RFPKOG<rfpkog::DoubleType> rfpkog(context, cmd_qs, devices, kernel_program, opts);
+    if (!rfpkog.setup_complete())
+    {
+      std::cerr << "Encountered error in setup." << std::endl;
+      return 1;
+    }
     rfpkog_status = rfpkog.run();
-    results = rfpkog.get_results();
+    results = rfpkog.results();
   }
   else
   {
-    rfpkog::RFPKOG<rfpkog::FloatType> rfpkog(context, cmd_qs, kernels, local_work_shapes, opts.sigma, opts.finitization, opts.degree, opts.verbosity, opts.symmetric, opts.fnames);
+    rfpkog::RFPKOG<rfpkog::FloatType> rfpkog(context, cmd_qs, devices, kernel_program, opts);
+    if (!rfpkog.setup_complete())
+    {
+      std::cerr << "Encountered error in setup." << std::endl;
+      return 1;
+    }
     rfpkog_status = rfpkog.run();
-    results = rfpkog.get_results();
+    results = rfpkog.results();
   }
   if (rfpkog_status)
   {

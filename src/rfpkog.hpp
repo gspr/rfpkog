@@ -25,6 +25,7 @@
 #include <chrono>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <thread>
@@ -32,6 +33,9 @@
 
 #include "cl_headers.hpp"
 #include "dtype.hpp"
+#include "kernel.hpp"
+#include "heat_kernel.hpp"
+#include "options.hpp"
 #include "pd.hpp"
 
 namespace rfpkog
@@ -42,35 +46,46 @@ namespace rfpkog
   public:
     RFPKOG(cl::Context & context,
            std::vector<cl::CommandQueue> & cmd_qs,
-           std::vector<cl::Kernel> & kernels,
-           const std::vector<std::array<std::size_t, 2> > & local_work_shapes,
-           typename T::scalar_type sigma,
-           typename T::scalar_type finitization,
-           unsigned int degree,
-           unsigned int verbosity,
-           bool symmetric,
-           const std::array<std::vector<std::string >, 2> & fnames) :
-      context(context), cmd_qs(cmd_qs), kernels(kernels), local_work_shapes(local_work_shapes),
-      sigma8(8*sigma), finitization(finitization), degree(degree), verbosity(verbosity), symmetric(symmetric),
-      fnames(fnames), idxs({0,0}), done(false),
-      results(fnames[0].size()*fnames[1].size(), std::numeric_limits<double>::quiet_NaN()),
-      statuses(cmd_qs.size(), CL_SUCCESS),
-      mutex()
+           const std::vector<cl::Device> & devices, 
+           const cl::Program & program,
+           const Options & opts) :
+      context_(context), cmd_qs_(cmd_qs), devices_(devices), program_(program), opts_(opts),
+      statuses_(devices.size(), CL_SUCCESS),
+      errors_(devices.size(), 0),
+      idxs_({0,0}), results_(opts.fnames[0].size()*opts.fnames[1].size(), std::numeric_limits<double>::quiet_NaN()),
+      mutex_(), done_(false), setup_complete_(false)
     {
+      for (std::size_t i = 0; i < cmd_qs.size(); ++i)
+      {
+        switch (opts_.kernel_choice)
+        {
+        case Kernel_choice::pssk:
+          kernels_.push_back(std::make_unique<Heat_kernel<T>>(context_, cmd_qs_[i], devices_[i], program_, opts_.local_work_shape, opts_.sigma));
+          break;
+        }
+
+        if (!kernels_.back()->is_ok())
+        {
+          statuses_[i] = kernels_.back()->get_status();
+          return;
+        }
+
+        if (kernels_.back()->init() != 0)
+        {
+          statuses_[i] = kernels_.back()->get_status();
+          return;
+        }
+      }
+      setup_complete_ = true;
     }
 
-    RFPKOG(const RFPKOG &) = delete;
-    RFPKOG & operator=(const RFPKOG &) = delete;
+    inline bool setup_complete() const { return setup_complete_; }
+    inline const std::vector<double> & results() const { return results_; }
 
-    inline const std::vector<double> & get_results() const
-    {
-      return results;
-    }
-    
     int run()
     {
       std::vector<std::thread> workers;
-      for (std::size_t w = 0; w < cmd_qs.size(); ++w)
+      for (std::size_t w = 0; w < cmd_qs_.size(); ++w)
         workers.emplace_back(&RFPKOG::worker, this, w);
 
       for (std::size_t w = 0; w < workers.size(); ++w)
@@ -81,14 +96,14 @@ namespace rfpkog
       bool success = true;
       for(std::size_t w = 0; w < workers.size(); ++w)
       {
-        if (statuses[w] == 1337) // FIXME
+        if (errors_[w] != 0)
         {
-          std::cerr << "Worker thread " << w << " failed to load a persistence diagram." << std::endl;
+          std::cerr << "Worker thread " << w << " encountered an error." << std::endl;
           success = false;
         }
-        else if (statuses[w] != CL_SUCCESS)
+        if (statuses_[w] != CL_SUCCESS)
         {
-          std::cerr << "Worker thread " << w << " encountered OpenCL error code " << statuses[w] << "." << std::endl;
+          std::cerr << "Worker thread " << w << " encountered OpenCL error code " << statuses_[w] << "." << std::endl;
           success = false;
         }
       }
@@ -100,242 +115,133 @@ namespace rfpkog
     }
 
   private:
-    cl::Context & context;
-    std::vector<cl::CommandQueue> & cmd_qs;
-    std::vector<cl::Kernel> & kernels;
-    const std::vector<std::array<std::size_t, 2> > & local_work_shapes;
-    const typename T::scalar_type sigma8;
-    const typename T::scalar_type finitization;
-    const unsigned int degree;
-    const unsigned int verbosity;
-    const bool symmetric;
-    const std::array<std::vector<std::string >, 2> & fnames;
-    std::array<std::size_t, 2> idxs;
-    bool done;
-    std::vector<double> results;
-    std::vector<cl_int> statuses;
-    std::mutex mutex;
+    cl::Context & context_;
+    std::vector<cl::CommandQueue> & cmd_qs_;
+    const std::vector<cl::Device> & devices_;
+    const cl::Program & program_;
+    const Options & opts_;
+    
+    std::vector<cl_int> statuses_;
+    std::vector<int> errors_;
 
+    std::array<std::size_t, 2> idxs_;
+    std::vector<double> results_;
+    std::mutex mutex_;
+    bool done_;
+    bool setup_complete_;
+    std::vector<std::unique_ptr<Kernel<T> > > kernels_;
+
+    
     inline void advance()
     {
-      ++idxs[1];
-      if (idxs[1] >= fnames[1].size())
+      ++idxs_[1];
+      if (idxs_[1] >= opts_.fnames[1].size())
       {
-        ++idxs[0];
-        idxs[1] = (symmetric ? idxs[0] : 0);
+        ++idxs_[0];
+        idxs_[1] = (opts_.symmetric ? idxs_[0] : 0);
       }
-      if (idxs[0] >= fnames[0].size())
-        done = true;
+      if (idxs_[0] >= opts_.fnames[0].size())
+        done_ = true;
     }
-
-    // ATTENTION: This method contains a lot of variables with names that shadow members.
+    
+    
     void worker(const std::size_t w)
     {
       bool done = false;
       std::array<std::size_t, 2> idxs = {std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
-      std::array<std::size_t, 2> prev_idxs = {std::numeric_limits<std::size_t>::max(), std::numeric_limits<std::size_t>::max()};
-      
+      std::array<std::size_t, 2> prev_idxs = idxs;
       std::array<std::vector<typename T::vector_type>, 2> pds;
-      cl::Buffer result_buf;
-      std::array<cl::Buffer, 2> pd_bufs;
-
-      cl::Kernel & kernel = kernels[w];
-      
-      std::unique_lock lock(this->mutex, std::defer_lock);
+      std::unique_lock lock(mutex_, std::defer_lock);
+      const std::array<std::size_t, 2> local_work_shape = kernels_[w]->get_local_work_shape();
+      int err = 0;
 
       std::chrono::time_point<std::chrono::steady_clock> t_0;
       std::chrono::time_point<std::chrono::steady_clock> t_1;
 
-      cl_int status = CL_SUCCESS;
-      
-      status = kernel.setArg(0, sigma8);
-      if (status != CL_SUCCESS)
-      {
-        lock.lock();
-        statuses[w] = status;
-        lock.unlock();
-      }
-      status = kernel.setArg(1, cl::Local(local_work_shapes[w][0]*sizeof(typename T::vector_type)));
-      if (status != CL_SUCCESS)
-      {
-        lock.lock();
-        statuses[w] = status;
-        lock.unlock();
-      }
-      status = kernel.setArg(2, cl::Local(local_work_shapes[w][1]*sizeof(typename T::vector_type)));
-      if (status != CL_SUCCESS)
-      {
-        lock.lock();
-        statuses[w] = status;
-        lock.unlock();
-      }
-      status = kernel.setArg(5, cl::Local(local_work_shapes[w][0]*local_work_shapes[w][1]*sizeof(typename T::scalar_type)));
-      if (status != CL_SUCCESS)
-      {
-        lock.lock();
-        statuses[w] = status;
-        lock.unlock();
-      }
-      
       while (true)
       {
-        if (verbosity >= 3)
-        {
-          lock.lock();
-          std::cerr << "Worker thread " << w << " entering main loop." << std::endl;
-          lock.unlock();
-        }
-
         lock.lock();
-        done = this->done;
+        done = done_;
         prev_idxs = idxs;
-        idxs = this->idxs;
+        idxs = idxs_;
         advance();
         lock.unlock();
 
         if (done)
           break;
 
-        if (verbosity >= 3)
+        if (opts_.verbosity >= 3)
         {
           lock.lock();
           std::cerr << "Worker thread " << w << " has a valid work unit (" << idxs[0] << "," << idxs[1] << ")." <<  std::endl;
           lock.unlock();
         }
-        
+
         for (auto a : {0, 1})
         {
           if (idxs[a] != prev_idxs[a])
           {
-            if (verbosity >= 3)
+            if (opts_.verbosity >= 3)
             {
               lock.lock();
               std::cerr << "Worker thread " << w << " is reloading PD_" << a << "." << std::endl;
               lock.unlock();
             }
             pds[a].clear();
-            int pd_err = read_dipha_degree<T>(fnames[a][idxs[a]], degree, finitization, pds[a]);
-            if (pd_err)
+            err = read_dipha_degree<T>(opts_.fnames[a][idxs[a]], opts_.degree, opts_.finitization, pds[a]);
+            if (err)
             {
               lock.lock();
-              statuses[w] = 1337; // FIXME.
+              std::cerr << "Thread " << w << " failed to read persistence diagram." << std::endl;
+              errors_[w] = err;
               lock.unlock();
-              return;
             }
-            if (pds[a].size() % local_work_shapes[w][a] != 0)
+
+            if (pds[a].size() % local_work_shape[a] != 0)
             {
               typename T::vector_type zero;
               zero.s[0] = 0;
               zero.s[1] = 0;
-              if (verbosity >= 4)
+              if (opts_.verbosity >= 4)
               {
                 lock.lock();
-                std::cerr << "Worker thread " << w << " is padding PD_" << a << " from size " << pds[a].size() << " to size " << (pds[a].size() + local_work_shapes[w][a] - (pds[a].size() % local_work_shapes[w][a])) << " to keep it a multiple of " << local_work_shapes[w][a] << "." << std::endl;
+                std::cerr << "Worker thread " << w << " is padding PD_" << a << " from size " << pds[a].size() << " to size " << (pds[a].size() + local_work_shape[a] - (pds[a].size() % local_work_shape[a])) << " to keep it a multiple of " << local_work_shape[a] << "." << std::endl;
                 lock.unlock();
               }
-              pds[a].resize(pds[a].size() + local_work_shapes[w][a] - (pds[a].size() % local_work_shapes[w][a]), zero);
+              pds[a].resize(pds[a].size() + local_work_shape[a] - (pds[a].size() % local_work_shape[a]), zero);
             }
             
-            pd_bufs[a] = cl::Buffer(context, CL_MEM_READ_ONLY, pds[a].size()*sizeof(typename T::vector_type), NULL, &status);
-            if (status != CL_SUCCESS)
+            err = kernels_[w]->prepare_new_pd(a, pds[a]);
+            if (err)
             {
               lock.lock();
-              statuses[w] = status;
+              statuses_[w] = kernels_[w]->get_status();
+              std::cerr << "Kernel in worker thread " << w << " encountered error. OpenCL error code " << statuses_[w] << "." << std::endl;
               lock.unlock();
               return;
             }
-            
-            status = cmd_qs[w].enqueueWriteBuffer(pd_bufs[a], true, 0, pds[a].size()*sizeof(typename T::vector_type), pds[a].data(), NULL, NULL);
-            if (status != CL_SUCCESS)
-            {
-              lock.lock();
-              statuses[w] = status;
-              lock.unlock();
-              return;
-            }
-            
           }
         }
-        
-        std::vector<typename T::scalar_type> thread_result((pds[0].size()/local_work_shapes[w][0])*(pds[1].size()/local_work_shapes[w][1]));
-        result_buf = cl::Buffer(context, CL_MEM_READ_WRITE, thread_result.size()*sizeof(typename T::scalar_type), NULL, &status);
-        if (status != CL_SUCCESS)
-        {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
-        }
-          
-        status = kernel.setArg(6, result_buf);
-        if (status != CL_SUCCESS)
-        {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
-        }
-        
-        status = kernel.setArg(3, pd_bufs[0]);
-        if (status != CL_SUCCESS)
-        {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
-        }
-        
-        status = kernel.setArg(4, pd_bufs[1]);
-        if (status != CL_SUCCESS)
-        {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
-        }
-        
-        if (verbosity >= 3)
+
+        if (opts_.verbosity >= 3)
         {
           lock.lock();
           std::cerr << "Worker thread " << w << " will now run kernel." << std::endl;
           lock.unlock();
         }
-        if (verbosity >= 1)
+        if (opts_.verbosity >= 1)
         {
           t_0 = std::chrono::steady_clock::now();
         }
 
-        cl::Event event;
-        status = cmd_qs[w].enqueueNDRangeKernel(kernel, cl::NDRange(), cl::NDRange(pds[0].size(), pds[1].size()), cl::NDRange(local_work_shapes[w][0], local_work_shapes[w][1]), NULL, &event);
-        if (status != CL_SUCCESS)
+        err = kernels_[w]->compute_partial_sums();
+        results_[idxs[0]*opts_.fnames[1].size() + idxs[1]] = kernels_[w]->sum();
+        if (opts_.symmetric)
         {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
-        }
-        event.wait();
-
-        status = cmd_qs[w].enqueueReadBuffer(result_buf, true, 0, thread_result.size()*sizeof(typename T::scalar_type), thread_result.data(), NULL, NULL);
-        if (status != CL_SUCCESS)
-        {
-          lock.lock();
-          statuses[w] = status;
-          lock.unlock();
-          return;
+          results_[idxs[1]*opts_.fnames[1].size() + idxs[0]] = results_[idxs[0]*opts_.fnames[1].size() + idxs[1]];
         }
 
-        double sum = 0;
-        for (std::size_t i = 0; i < thread_result.size(); ++i)
-          sum += thread_result[i];
-        
-        this->results[idxs[0]*fnames[1].size() + idxs[1]] = sum / (sigma8*PI);
-        if (this->symmetric)
-        {
-          this->results[idxs[1]*fnames[1].size() + idxs[0]] = this->results[idxs[0]*fnames[1].size() + idxs[1]];
-        }
-
-        if (verbosity >= 1)
+        if (opts_.verbosity >= 1)
         {
           t_1 = std::chrono::steady_clock::now();
           std::chrono::duration<double> elapsed = t_1 - t_0;
@@ -343,17 +249,16 @@ namespace rfpkog
           std::cerr << "Worker thread " << w << " computed result (" << idxs[0] << "," << idxs[1] << ") in " << elapsed.count() << " s." << std::endl;
           lock.unlock();
         }
+        
       } // End main loop.
 
-      if (verbosity >= 3)
+      if (opts_.verbosity >= 3)
       {
         lock.lock();
         std::cerr << "Worker thread " << w << " is ending." << std::endl;
         lock.unlock();
       }
     }
-
     
   };
-
 }
