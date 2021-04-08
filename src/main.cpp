@@ -290,7 +290,7 @@ int main(int argc, char ** argv)
   {
     for (std::size_t j = 0; j < opts.fnames[1].size(); ++j)
     {
-      output << results[i*opts.fnames[0].size() + j] << " ";
+      output << results[i*opts.fnames[1].size() + j] << " ";
     }
     output << std::endl;
   }
