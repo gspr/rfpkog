@@ -61,8 +61,8 @@ def main():
                 X[j, i] = X[i, j]
         else:
             for j in range(0, X.shape[1]):
-                if fnames[1][j] != prev_fnames[j]:
-                    pds[1] = persistence_diagram.load(fnames[1][j])[args.degree]
+                if fnames[1][j] != prev_fnames[1]:
+                    pds[1] = persistence_diagram.load(fnames[1][j], args.finitization)[args.degree]
                     prev_fnames[1] = fnames[1][j]
                 X[i, j] = PSSK(pds[0], pds[1])/(2*np.sqrt(2*np.pi*args.sigma))
 
