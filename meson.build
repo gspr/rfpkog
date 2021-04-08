@@ -1,5 +1,5 @@
 project('rfpkog', 'cpp',
-  version : '0.2.0',
+  version : '0.3.0',
   default_options : ['cpp_std=c++17'])
 
 dep_threads = dependency('threads')
