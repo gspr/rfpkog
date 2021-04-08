@@ -30,8 +30,10 @@ for more information.
 
 ## About
 
-The [heat kernel](https://doi.org/10.1109/CVPR.2015.7299106) is
-currently the only supported one. Support for other kernels will come.
+The [heat kernel (AKA
+PSSK)](https://doi.org/10.1109/CVPR.2015.7299106) is currently the
+only well-supported one. There is experimental support for the arctan
+version of the [PWGK](http://proceedings.mlr.press/v48/kusano16.html).
 
 The code is licensed under the GNU Lesser General Public License,
 version 3.0.
@@ -80,7 +82,7 @@ environment variable `RFPKOG_KERNEL_FILE_NAME`.
 
 Run with `--help` to see a help text. An example invocation is
 ```
-rfpkog -d 1 --devices 0 --platform 0 -f 1.0 -s 1.0 list_1.txt list_2.txt
+rfpkog --kernel heat -d 1 --devices 0 --platform 0 -f 1.0 -s 1.0 list_1.txt list_2.txt
 ```
 
 See `rfpkog --help` for more information.
