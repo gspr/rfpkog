@@ -358,7 +358,7 @@ namespace rfpkog
     s << "-k, --kernel <k>         Kernel to compute. Optional. Valid options are:" << std::endl;
     s << "                          - pssk: (Default) Persistence Scale Space Kernel" << std::endl;
     s << "                          - heat: Synonym for \"pssk\"" << std::endl;
-    s << "                          - pwgk: Persistence Weighted Gaussian Kernel" << std::endl;
+    s << "                          - pwgk: Persistence Weighted Gaussian Kernel (UNTESTED, UNDOCUMENTED)" << std::endl;
     s << "-h, --help               Print this help message." << std::endl;
     s << "-l, --list               List all OpenCL platforms and devices available on the system." << std::endl;
     s << "-o, --output <f>         Use f as the output file name. Use - for standard output. [Default: -]" << std::endl;
